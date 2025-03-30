@@ -14,7 +14,7 @@ def main(args):
         if os.path.isfile(f) and f.endswith(".casadi"):
             if args.fn_name == "all" or args.fn_name in f:
                 print("CasADi function found: ", f)
-                casadi_fns.append(casadi.Function.load(f))
+                casadi_fns.append(Function.load(f))
     for f in casadi_fns:
         if args.precision:
             print("Generating double code")

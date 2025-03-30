@@ -17,11 +17,11 @@ fn_filepath_1e2 = os.path.join(CUSADI_BENCHMARK_DIR, "fn_1e2.casadi")
 fn_filepath_1e3 = os.path.join(CUSADI_BENCHMARK_DIR, "fn_1e3.casadi")
 fn_filepath_1e4 = os.path.join(CUSADI_BENCHMARK_DIR, "fn_1e4.casadi")
 fn_filepath_1e5 = os.path.join(CUSADI_BENCHMARK_DIR, "fn_1e5.casadi")
-fn_1e1 = casadi.Function.load(fn_filepath_1e1)
-fn_1e2 = casadi.Function.load(fn_filepath_1e2)
-fn_1e3 = casadi.Function.load(fn_filepath_1e3)
-fn_1e4 = casadi.Function.load(fn_filepath_1e4)
-fn_1e5 = casadi.Function.load(fn_filepath_1e5)
+fn_1e1 = Function.load(fn_filepath_1e1)
+fn_1e2 = Function.load(fn_filepath_1e2)
+fn_1e3 = Function.load(fn_filepath_1e3)
+fn_1e4 = Function.load(fn_filepath_1e4)
+fn_1e5 = Function.load(fn_filepath_1e5)
 benchmark_casadi_fns = [fn_1e1, fn_1e2, fn_1e3, fn_1e4, fn_1e5]
 N_INSTRUCTIONS = []
 

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 N_ENVS_PER_INIT = 50
 N_ENVS = 3 * N_ENVS_PER_INIT
-fn_drone_LQR = casadi.Function.load(os.path.join(CUSADI_FUNCTION_DIR, "drone_sim_LQR_sweep.casadi"))
+fn_drone_LQR = Function.load(os.path.join(CUSADI_FUNCTION_DIR, "drone_sim_LQR_sweep.casadi"))
 step_drone_LQR = CusadiFunction(fn_drone_LQR, N_ENVS)
 
 t_start = 0

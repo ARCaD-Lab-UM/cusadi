@@ -9,7 +9,7 @@ from src import *
 from casadi import *
 
 N_ENVS = 30000
-fn_drone_ROA = casadi.Function.load(os.path.join(CUSADI_FUNCTION_DIR, "drone_sim_LQR_ROA.casadi"))
+fn_drone_ROA = Function.load(os.path.join(CUSADI_FUNCTION_DIR, "drone_sim_LQR_ROA.casadi"))
 step_drone_ROA = CusadiFunction(fn_drone_ROA, N_ENVS)
 
 t_start = 0

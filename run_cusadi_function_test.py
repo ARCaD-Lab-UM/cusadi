@@ -7,7 +7,7 @@ from src import *
 
 def main(args):
     fn_filepath = os.path.join(CUSADI_FUNCTION_DIR, f"{args.fn_name}.casadi")
-    f = casadi.Function.load(fn_filepath)
+    f = Function.load(fn_filepath)
     print("Evaluating function:", f.name())
     print("Function has %d arguments" % f.n_in())
     print("Function has %d outputs" % f.n_out())
