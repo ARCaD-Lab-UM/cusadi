@@ -2,7 +2,7 @@ import os
 import argparse
 import torch
 from casadi import *
-from src import *
+from cusadi import *
 
 
 def main(args):

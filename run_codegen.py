@@ -2,7 +2,7 @@ import os
 import time
 import argparse
 from casadi import *
-from src import *
+from cusadi import *
 
 # TODO: REPEAT BENCHMARK WITH TORCH VMAP INSTEAD OF VECTORIZING WITH DICT. 
 
