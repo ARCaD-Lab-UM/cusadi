@@ -38,6 +38,24 @@ class CusadiFunction:
         self._setup()
 
     def evaluate(self, inputs):
+        # Validate inputs
+        for i, t in enumerate(inputs):
+            # Check dtype
+            if t.dtype != torch.float64:
+                raise ValueError(f"input {i} ({self.fn_casadi.name_in(i)}) is of dtype {t.dtype}. Inputs to CusADi functions must be of dtype torch.float64")
+            
+            # Check device
+            if not t.is_cuda:
+                raise ValueError(f"input {i} ({self.fn_casadi.name_in(i)}) is not CUDA. Inputs to CusADi functions must be stored on GPU")
+            
+            # Check dimensions
+            if t.ndim == 1:
+                if t.shape != (self.num_instances,):
+                    raise ValueError(f"input {i} ({self.fn_casadi.name_in(i)}) is of shape {t.shape}, but must be of shape {(self.num_instances,)}. Have you flattened and sparsified this input?")
+            else:
+                if t.shape != (self.num_instances, self.fn_casadi.nnz_in(i)):
+                    raise ValueError(f"input {i} ({self.fn_casadi.name_in(i)}) is of shape {t.shape}, but must be of shape {(self.num_instances, self.fn_casadi.nnz_in(i))}. Have you flattened and sparsified this input?")
+        
         self._clearTensors()
         self._prepareInputTensor(inputs)
         self.eval_time = self._fn_library.evaluate(self._fn_input,

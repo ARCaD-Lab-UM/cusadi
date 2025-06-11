@@ -52,6 +52,15 @@ def generateCMakeLists(casadi_fns):
 
     # Add and link libraries for each CasADi function
     cmake_strings['libraries'] = str_libraries
+    
+    # Uncomment this to debug CUDA memory errors
+    # If you do that, also comment out the the "Set CUDA flags" line above
+    # cmake_strings['flags'] = textwrap.dedent(
+    # f'''
+    # target_compile_options({f.name()} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+    # -Xcompiler -rdynamic -lineinfo -arch=sm_89 --use_fast_math
+    # >)
+    # ''')
 
     # * Write codegen to file
     for cmake_str in cmake_strings.values():
