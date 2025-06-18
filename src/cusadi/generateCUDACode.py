@@ -27,7 +27,7 @@ def generateCMakeLists(casadi_fns):
     set(CMAKE_CXX_STANDARD 11)
 
     # Set CUDA flags
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -O3 -arch=sm_89 --use_fast_math)  # Adjust architecture as needed
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -O3 -arch=native --use_fast_math)  # Adjust architecture as needed
 
     """)
 
