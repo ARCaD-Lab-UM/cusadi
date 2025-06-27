@@ -25,12 +25,20 @@ class CusadiFunction:
     _fn_output = []
 
     # ! Public methods:
-    def __init__(self, fn_casadi, num_instances):
+    def __init__(self, fn_casadi, num_instances, dtype=torch.double):
         assert torch.cuda.is_available()
-        lib_filepath = os.path.join(CUSADI_BUILD_DIR, f"lib{fn_casadi.name()}.so")
+        if dtype == torch.double:
+            self.dtype_str = 'double'
+        elif dtype == torch.float:
+            self.dtype_str = 'float'
+        else:
+            raise ValueError(f'Cusadi function dtypes can only be torch.double or torch.float, but found {self.dtype}')
+
+        lib_filepath = os.path.join(CUSADI_BUILD_DIR, f"lib{fn_casadi.name()}__{self.dtype_str}.so")
         self.fn_casadi = fn_casadi
         self.fn_name = fn_casadi.name()
         self.num_instances = num_instances
+        self.dtype = dtype
         self._fn_library = ctypes.CDLL(lib_filepath)
         self._fn_library.evaluate.restype = ctypes.c_float
         print("Loaded CasADi function: ", self.fn_casadi)
@@ -41,8 +49,8 @@ class CusadiFunction:
         # Validate inputs
         for i, t in enumerate(inputs):
             # Check dtype
-            if t.dtype != torch.float64:
-                raise ValueError(f"input {i} ({self.fn_casadi.name_in(i)}) is of dtype {t.dtype}. Inputs to CusADi functions must be of dtype torch.float64")
+            if t.dtype != self.dtype:
+                raise ValueError(f"input {i} ({self.fn_casadi.name_in(i)}) is of dtype {t.dtype}, but it must match this function's dtype {self.dtype}")
             
             # Check device
             if not t.is_cuda:
@@ -72,7 +80,7 @@ class CusadiFunction:
             .repeat(self.num_instances)
         dim_dense = (self.num_instances, self.fn_casadi.size1_out(out_idx), self.fn_casadi.size2_out(out_idx))
         return torch.sparse_coo_tensor(torch.vstack((env_idx, row_idx, col_idx)),
-                                       self.outputs_sparse[out_idx].reshape(-1), 
+                                       self.outputs_sparse[out_idx].reshape(-1),
                                        dim_dense).to_dense()
     
     def checkInputDimensions(self, inputs):
@@ -87,18 +95,18 @@ class CusadiFunction:
     # ! Private methods:
     def _setup(self):
         self._input_tensors = [torch.zeros((self.num_instances, self.fn_casadi.nnz_in(i)),
-                                            device=self._device, dtype=torch.double).contiguous()
+                                            device=self._device, dtype=self.dtype).contiguous()
                                for i in range(self.fn_casadi.n_in())]
         self._output_tensors = [torch.zeros(self.num_instances, self.fn_casadi.nnz_out(i),
-                                            device=self._device, dtype=torch.double).contiguous()
+                                            device=self._device, dtype=self.dtype).contiguous()
                                 for i in range(self.fn_casadi.n_out())]
         self._output_tensors_dense = [torch.zeros((self.num_instances,
                                                    self.fn_casadi.size1_out(i),
                                                    self.fn_casadi.size2_out(i)),
-                                      device=self._device, dtype=torch.double).contiguous()
+                                      device=self._device, dtype=self.dtype).contiguous()
                                       for i in range(self.fn_casadi.n_out())]
         self._work_tensor = torch.zeros((self.num_instances, self.fn_casadi.sz_w()),
-                                        device=self._device, dtype=torch.double).contiguous()
+                                        device=self._device, dtype=self.dtype).contiguous()
         self._input_ptrs = torch.zeros(self.fn_casadi.n_in(), device='cuda', dtype=torch.int64).contiguous()
         self._output_ptrs = torch.zeros(self.fn_casadi.n_out(), device='cuda', dtype=torch.int64).contiguous()
         for i in range(self.fn_casadi.n_in()):
@@ -107,7 +115,7 @@ class CusadiFunction:
             self._output_ptrs[i] = self._output_tensors[i].data_ptr()
         self._fn_input = self._castAsCPointer(self._input_ptrs.data_ptr(), 'int')
         self._fn_output = self._castAsCPointer(self._output_ptrs.data_ptr(), 'int')
-        self._fn_work = self._castAsCPointer(self._work_tensor.data_ptr(), 'double')
+        self._fn_work = self._castAsCPointer(self._work_tensor.data_ptr(), self.dtype_str)
         self.inputs_sparse = self._input_tensors
         self.outputs_sparse = self._output_tensors
         self.outputs_dense = self._output_tensors_dense

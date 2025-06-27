@@ -2,7 +2,7 @@ import textwrap
 from casadi import *
 from . import *
 
-def generateCMakeLists(casadi_fns):
+def generateCMakeLists(casadi_fns, dtype_str='double'):
     cmake_filepath = os.path.join(CUSADI_ROOT_DIR, "CMakeLists.txt")
     cmake_file = open(cmake_filepath, "w+")
     cmake_strings = {}
@@ -38,9 +38,10 @@ def generateCMakeLists(casadi_fns):
         print(f.name())
         fn_source_name = f.name().upper() + "_SOURCE"
         fn_filepath = f"codegen/{f.name()}.cu"
+        fn_lib_name = f'{f.name()}__{dtype_str}'
         str_sources += f"set({fn_source_name} {fn_filepath})\n"
-        str_libraries += f"add_library({f.name()} SHARED ${{{fn_source_name}}})\n"
-        str_libraries += f"target_link_libraries({f.name()})\n"
+        str_libraries += f"add_library({fn_lib_name} SHARED ${{{fn_source_name}}})\n"
+        str_libraries += f"target_link_libraries({fn_lib_name})\n"
 
     cmake_strings['sources'] = str_sources
     cmake_strings['include'] = textwrap.dedent(
@@ -57,7 +58,7 @@ def generateCMakeLists(casadi_fns):
     # If you do that, also comment out the the "Set CUDA flags" line above
     # cmake_strings['flags'] = textwrap.dedent(
     # f'''
-    # target_compile_options({f.name()} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+    # target_compile_options({fn_lib_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
     # -Xcompiler -rdynamic -lineinfo -arch=sm_89 --use_fast_math
     # >)
     # ''')
@@ -260,7 +261,6 @@ def generateCUDACodeFloat(f, filepath=None, benchmarking=True, debug_mode=True):
             float *outputs[],
             const int batch_size) {
     ''')
-    str_kernel += f"\n    float work_env[{n_w}];"
     str_kernel +=  "\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;"
     str_kernel +=  "\n    int env_idx = idx * n_w;"
     str_kernel +=  "\n    if (idx < batch_size) {"
