@@ -66,8 +66,8 @@ def setupParser():
                         help='Precision of generated fn, either double or float. Defaults to double')
     parser.add_argument('--gen_CUDA', type=bool, dest='gen_CUDA', default=True,
                         help='Generate CUDA codegen. Defaults to True')
-    parser.add_argument('--gen_pytorch', type=bool, dest='gen_pytorch', default=False,
-                        help='Generate Pytorch codegen in addition to CUDA. Defaults to False')
+    parser.add_argument('--gen_pytorch', action='store_true', dest='gen_pytorch',
+                        help='Generate Pytorch codegen in addition to CUDA.')
     parser.add_argument('--benchmark', type=bool, dest='codegen_benchmark_fns', default=False,
                         help='Generate functions for benchmarking. Defaults to False')
     return parser
